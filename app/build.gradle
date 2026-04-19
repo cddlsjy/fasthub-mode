@@ -1,0 +1,238 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+    id 'com.apollographql.apollo3'
+}
+
+android {
+    namespace 'com.fastaccess.github'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.fastaccess.github"
+        minSdk 21
+        targetSdk 34
+        versionCode 473
+        versionName "4.7.3"
+
+        // 从 gradle.properties 读取密钥
+        def githubClientId = project.findProperty("GITHUB_CLIENT_ID") ?: ""
+        def githubSecret = project.findProperty("GITHUB_SECRET") ?: ""
+        def imgurClientId = project.findProperty("IMGUR_CLIENT_ID") ?: ""
+        def imgurSecret = project.findProperty("IMGUR_SECRET") ?: ""
+        buildConfigField "String", "GITHUB_CLIENT_ID", "\"$githubClientId\""
+        buildConfigField "String", "GITHUB_SECRET", "\"$githubSecret\""
+        buildConfigField "String", "IMGUR_CLIENT_ID", "\"$imgurClientId\""
+        buildConfigField "String", "IMGUR_SECRET", "\"$imgurSecret\""
+        buildConfigField "String", "REST_URL", '"https://api.github.com/"'
+        buildConfigField "String", "IMGUR_URL", '"https://api.imgur.com/3/"'
+
+        multiDexEnabled true
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath true
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+    }
+
+    sourceSets {
+        main {
+            res.srcDirs = [
+                    "src/main/res/",
+                    "src/main/res/layouts/main_layouts",
+                    "src/main/res/layouts/row_layouts",
+                    "src/main/res/layouts/other_layouts",
+                    "src/main/res/translations",
+                    "src/main/res"
+            ]
+        }
+    }
+
+    lint {
+        abortOnError false
+        htmlReport true
+        xmlReport true
+        disable 'InvalidPackage'
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/rxjava.properties']
+        }
+    }
+}
+
+apollo {
+    generateKotlinModels.set(true)
+    packageName.set("com.fastaccess.github")
+}
+
+repositories {
+    maven { url "https://clojars.org/repo/" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    // AndroidX Core
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.browser:browser:1.7.0'
+    implementation 'androidx.palette:palette:1.0.0'
+    implementation 'androidx.annotation:annotation:1.7.1'
+    implementation 'androidx.core:core:1.12.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
+
+    // ThirtyInch
+    implementation "net.grandcentrix.thirtyinch:thirtyinch:${thirtyinchVersion}"
+    implementation "net.grandcentrix.thirtyinch:thirtyinch-rx2:${thirtyinchVersion}"
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:${retrofit}"
+    implementation "com.squareup.retrofit2:converter-gson:${retrofit}"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:${retrofit}"
+    implementation "com.squareup.retrofit2:converter-scalars:${retrofit}"
+
+    // OkHttp
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+
+    // Rx
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+
+    // Glide
+    implementation "com.github.bumptech.glide:glide:${glideVersion}"
+    kapt "com.github.bumptech.glide:compiler:${glideVersion}"
+
+    // ShapedImageView
+    implementation 'cn.gavinliu:ShapedImageView:0.8.7'
+
+    // ButterKnife
+    implementation "com.jakewharton:butterknife:${butterKnifeVersion}"
+    kapt "com.jakewharton:butterknife-compiler:${butterKnifeVersion}"
+
+    // BottomNavigation
+    implementation 'it.sephiroth.android.library.bottomnavigation:bottom-navigation:2.0.2'
+
+    // Stream API
+    implementation 'com.annimon:stream:1.2.2'
+
+    // Toasty
+    implementation 'com.github.GrenderG:Toasty:1.5.2'
+
+    // DatePicker
+    implementation 'com.github.k0shk0sh:RetainedDateTimePickers:1.0.2'
+
+    // MaterialAbout
+    implementation 'com.github.daniel-stoneuk:material-about-library:2.1.0'
+
+    // Requery
+    implementation "io.requery:requery:${requery}"
+    implementation "io.requery:requery-android:${requery}"
+    kapt "io.requery:requery-processor:${requery}"
+
+    // AboutLibraries
+    implementation('com.mikepenz:aboutlibraries:11.2.3') {
+        transitive = true
+    }
+
+    // HtmlSpanner
+    implementation 'com.github.nightwhistler:HtmlSpanner:0.4'
+
+    // CommonMark
+    implementation "com.atlassian.commonmark:commonmark:${commonmark}"
+    implementation "com.atlassian.commonmark:commonmark-ext-autolink:${commonmark}"
+    implementation "com.atlassian.commonmark:commonmark-ext-gfm-strikethrough:${commonmark}"
+    implementation "com.atlassian.commonmark:commonmark-ext-gfm-tables:${commonmark}"
+    implementation "com.atlassian.commonmark:commonmark-ext-ins:${commonmark}"
+    implementation "com.atlassian.commonmark:commonmark-ext-yaml-front-matter:${commonmark}"
+
+    // Firebase (使用 BOM)
+    implementation platform('com.google.firebase:firebase-bom:32.7.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-perf'
+    implementation 'com.google.firebase:firebase-crashlytics'
+
+    // Play Services
+    implementation 'com.google.android.gms:play-services-base:18.3.0'
+
+    // RxFirebase
+    implementation 'com.github.b3er.rxfirebase:firebase-database:11.2.0'
+
+    // Billing
+    implementation 'com.github.miguelbcr:RxBillingService:0.0.3'
+
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlin_version}"
+
+    // JSoup
+    implementation 'org.jsoup:jsoup:1.16.1'
+
+    // Android State
+    implementation "com.evernote:android-state:${state_version}"
+    kapt "com.evernote:android-state-processor:${state_version}"
+
+    // ColorPicker
+    implementation 'petrov.kristiyan:colorpicker-library:1.1.4'
+
+    // Apollo GraphQL
+    implementation 'com.apollographql.apollo:apollo-runtime:3.8.2'
+    implementation 'com.apollographql.apollo:apollo-rx2-support:3.8.2'
+
+    // 其他工具
+    implementation 'com.jaredrummler:android-device-names:1.1.9'
+    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.1.0'
+    implementation 'com.firebase:firebase-jobdispatcher:0.8.2'
+    implementation 'com.google.guava:guava:31.1-android'
+
+    // Lombok
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    kapt "org.projectlombok:lombok:${lombokVersion}"
+
+    // 调试工具
+    debugImplementation 'com.github.whataa:pandora:2.0.6'
+    releaseImplementation 'com.github.whataa:pandora-no-op:2.0.3'
+
+    // 配置排除冲突
+    configurations {
+        all*.exclude module: 'javax.annotation'
+        all*.exclude group: 'org.jetbrains', module: 'annotations-java5'
+    }
+}
